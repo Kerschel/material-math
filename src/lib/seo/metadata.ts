@@ -1,4 +1,4 @@
-// SEO metadata utilities: generate page titles, descriptions, and structured data
+// SEO metadata utilities
 import type { Metadata } from "next";
 
 export function generateCalculatorMetadata(
@@ -8,7 +8,7 @@ export function generateCalculatorMetadata(
   const title = `${materialName} Calculator - Free Online Material Estimator`;
   const desc =
     description ??
-    `Use our free ${materialName.toLowerCase()} calculator to estimate how much ${materialName.toLowerCase()} you need for your project. Get instant results in cubic yards, tons, and bags.`;
+    `Use our free ${materialName.toLowerCase()} calculator to estimate how much ${materialName.toLowerCase()} you need. Get instant results in cubic yards, tons, and bags.`;
 
   return {
     title,
@@ -53,6 +53,9 @@ export function generateProgrammaticMetadata(
   return {
     title,
     description,
+    alternates: {
+      canonical: `https://materialmath.com${path}`,
+    },
     openGraph: {
       title,
       description,
@@ -64,32 +67,20 @@ export function generateProgrammaticMetadata(
       title,
       description,
     },
-    alternates: {
-      canonical: `https://materialmath.com${path}`,
-    },
-    other: {
-      "script:ld+json": JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Article",
-        headline: title,
-        description,
-        about: {
-          "@type": "Thing",
-          name: title,
-        },
-      }),
-    },
   };
 }
 
 export function generateHomepageMetadata(): Metadata {
-  const title = "Material Math — Free Online Material Calculators for Home Projects";
+  const title = "Material Math — Free Construction Calculators";
   const description =
-    "Instant material calculators for mulch, soil, gravel, concrete, pavers, and more. Enter dimensions, get exactly how much material you need plus cost estimates. Free and easy to use.";
+    "Free construction material calculators. Enter your measurements, know what to buy. No sign-up, no guesswork. Concrete, mulch, gravel, pavers & more.";
 
   return {
     title,
     description,
+    alternates: {
+      canonical: "https://materialmath.com",
+    },
     openGraph: {
       title,
       description,
@@ -108,11 +99,6 @@ export function generateHomepageMetadata(): Metadata {
         name: "Material Math",
         description,
         url: "https://materialmath.com",
-        potentialAction: {
-          "@type": "SearchAction",
-          target: "https://materialmath.com/?q={search_term_string}",
-          "query-input": "required name=search_term_string",
-        },
       }),
     },
   };
