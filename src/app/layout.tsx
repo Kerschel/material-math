@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Crimson_Pro, Source_Sans_3, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import "./globals.css";
 
 const crimsonPro = Crimson_Pro({
@@ -92,6 +93,16 @@ export default function RootLayout({
       className={`${crimsonPro.variable} ${sourceSans3.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--bg)] text-[var(--ink)] font-sans">
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Material Math",
+            description:
+              "Free, trustworthy construction material calculators. Enter your measurements, know what to buy.",
+            url: "https://materialmath.com",
+          }}
+        />
         {/* Skip link */}
         <a href="#main-content" className="skip-link">
           Skip to content

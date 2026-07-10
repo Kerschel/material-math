@@ -4,6 +4,7 @@ import { generateHomepageMetadata } from "@/lib/seo/metadata";
 import { CalculatorCard } from "@/components/CalculatorCard";
 import { materialConfigs } from "@/data/material-constants";
 import { calculatorIcons } from "@/lib/icon-map";
+import { JsonLd } from "@/components/JsonLd";
 import { Flower2, Mountain, HardHat } from "lucide-react";
 
 export const metadata: Metadata = generateHomepageMetadata();
@@ -22,8 +23,24 @@ export default function HomePage() {
     .filter(Boolean);
 
   return (
-    <div>
-      {/* Hero */}
+    <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Material Math",
+          description:
+            "Free construction material calculators. Enter your measurements, know what to buy.",
+          url: "https://materialmath.com",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://materialmath.com/?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }}
+      />
+      <div>
+        {/* Hero */}
       <section className="blueprint-grid py-24 sm:py-32 px-4">
         <div className="max-w-3xl mx-auto">
           <p className="text-sm font-medium text-[var(--accent)] mb-4 tracking-wide uppercase">
@@ -333,5 +350,6 @@ export default function HomePage() {
         </Link>
       </section>
     </div>
+    </>
   );
 }

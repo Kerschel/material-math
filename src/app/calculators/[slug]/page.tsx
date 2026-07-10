@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { materialConfigs, type MaterialSlug } from "@/data/material-constants";
 import { generateCalculatorMetadata } from "@/lib/seo/metadata";
 import { GenericCalculator } from "@/components/GenericCalculator";
+import { JsonLd } from "@/components/JsonLd";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -20,5 +21,24 @@ export default async function CalculatorPage({ params }: Props) {
   const config = materialConfigs[slug as MaterialSlug];
   if (!config) notFound();
 
-  return <GenericCalculator slug={slug as MaterialSlug} />;
+  return (
+    <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: `${config.displayName} Calculator`,
+          description: config.description,
+          applicationCategory: "EducationalApplication",
+          operatingSystem: "Web",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+          },
+        }}
+      />
+      <GenericCalculator slug={slug as MaterialSlug} />
+    </>
+  );
 }

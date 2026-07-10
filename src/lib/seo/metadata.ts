@@ -1,4 +1,4 @@
-// SEO metadata utilities
+// SEO metadata utilities — titles, descriptions, OG, Twitter
 import type { Metadata } from "next";
 
 export function generateCalculatorMetadata(
@@ -26,21 +26,6 @@ export function generateCalculatorMetadata(
     },
     alternates: {
       canonical: `https://materialmath.com/calculators/${materialName.toLowerCase().replace(/\s+/g, "-")}`,
-    },
-    other: {
-      "script:ld+json": JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        name: `${materialName} Calculator`,
-        description: desc,
-        applicationCategory: "EducationalApplication",
-        operatingSystem: "Web",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-      }),
     },
   };
 }
@@ -91,15 +76,6 @@ export function generateHomepageMetadata(): Metadata {
       card: "summary_large_image",
       title,
       description,
-    },
-    other: {
-      "script:ld+json": JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: "Material Math",
-        description,
-        url: "https://materialmath.com",
-      }),
     },
   };
 }
