@@ -105,18 +105,51 @@ function getDepthsForMaterial(slug: MaterialSlug): { value: number; unit: string
         { value: 4, unit: "inches" },
         { value: 6, unit: "inches" },
       ];
+    case "pavers":
+      return [
+        { value: 2, unit: "inches" },
+        { value: 3, unit: "inches" },
+      ];
     case "sand":
       return [
         { value: 1, unit: "inch" },
         { value: 2, unit: "inches" },
         { value: 4, unit: "inches" },
       ];
-    case "rock":
+    case "topsoil":
+      return [
+        { value: 2, unit: "inches" },
+        { value: 4, unit: "inches" },
+        { value: 6, unit: "inches" },
+      ];
+    case "stone":
+      return [
+        { value: 2, unit: "inches" },
+        { value: 3, unit: "inches" },
+        { value: 4, unit: "inches" },
+      ];
+    case "fill-dirt":
+      return [
+        { value: 6, unit: "inches" },
+        { value: 12, unit: "inches" },
+        { value: 24, unit: "inches" },
+      ];
+    case "limestone":
+      return [
+        { value: 4, unit: "inches" },
+        { value: 6, unit: "inches" },
+      ];
+    case "river-rock":
       return [
         { value: 2, unit: "inches" },
         { value: 3, unit: "inches" },
       ];
-    case "limestone":
+    case "pea-gravel":
+      return [
+        { value: 2, unit: "inches" },
+        { value: 3, unit: "inches" },
+      ];
+    case "crushed-stone":
       return [
         { value: 4, unit: "inches" },
         { value: 6, unit: "inches" },
@@ -126,8 +159,12 @@ function getDepthsForMaterial(slug: MaterialSlug): { value: number; unit: string
         { value: 2, unit: "inches" },
         { value: 4, unit: "inches" },
       ];
-    default:
-      return [{ value: materialConfigs[slug]?.defaultDepthIn ?? 3, unit: "inches" }];
+    case "brick":
+      return []; // Brick doesn't use depth
+    default: {
+      const fallback = (materialConfigs as Record<string, { defaultDepthIn: number } | undefined>)[slug]?.defaultDepthIn ?? 3;
+      return [{ value: fallback, unit: "inches" }];
+    }
   }
 }
 
@@ -142,6 +179,10 @@ function getContextLabel(group: string): string {
       return "Patio";
     case "driveway":
       return "Driveway";
+    case "walkway":
+      return "Walkway";
+    case "wall":
+      return "Wall";
     default:
       return "Project";
   }

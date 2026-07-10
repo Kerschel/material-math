@@ -1,4 +1,4 @@
-// Rock / Decorative Stone Calculator
+// Decorative Stone Calculator
 import {
   calculateBulkMaterial,
   type BasicInput,
@@ -7,19 +7,14 @@ import {
 import { nationalPrices, type CostEstimate } from "@/lib/pricing";
 import type { MaterialSubtype } from "@/data/material-constants";
 
-export interface RockResults extends BulkMaterialResults {
+export interface StoneResults extends BulkMaterialResults {
   costEstimate: CostEstimate;
 }
 
-const densityMap: Record<string, number> = {
-  "Lava Rock": 0.65,
-  "River Rock": 1.55,
-  "Crushed Granite": 1.45,
-  "Pea Gravel": 1.35,
-  "Limestone Gravel": 1.4,
-};
-
-export function calculateRock(input: BasicInput, subtype?: MaterialSubtype): RockResults {
+export function calculateStone(
+  input: BasicInput,
+  subtype?: MaterialSubtype
+): StoneResults {
   const density = subtype?.densityTonsPerCy ?? 1.4;
 
   const base = calculateBulkMaterial(input, {
@@ -27,8 +22,10 @@ export function calculateRock(input: BasicInput, subtype?: MaterialSubtype): Roc
     bagSizeCuft: 0.5,
   });
 
-  const costLow = base.tons * nationalPrices.rock_ton.low;
-  const costHigh = base.tons * nationalPrices.rock_ton.high;
+  const priceLow = subtype?.priceLow ?? nationalPrices.rock_ton.low;
+  const priceHigh = subtype?.priceHigh ?? nationalPrices.rock_ton.high;
+  const costLow = base.tons * priceLow;
+  const costHigh = base.tons * priceHigh;
 
   return {
     ...base,

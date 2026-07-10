@@ -10,7 +10,7 @@ import {
 import type { MaterialSubtype } from "@/data/material-constants";
 
 interface MaterialSelectorProps {
-  subtypes: MaterialSubtype[];
+  subtypes: readonly MaterialSubtype[];
   selected: string;
   onSelect: (subtypeName: string) => void;
   label?: string;

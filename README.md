@@ -1,39 +1,45 @@
 # Material Math
 
-**Free online material calculators for home improvement and landscaping projects.**
+**Free online material calculators for home improvement and landscaping projects.** Enter your project dimensions and instantly get how much mulch, soil, gravel, concrete, pavers, or any material you need — plus cost estimates.
 
-Enter your project dimensions and instantly get how much mulch, soil, gravel, concrete, pavers, or other material you need — with cost estimates.
+## Live Site
 
-## Calculators Included (15 Total)
+[https://materialmath.com](https://materialmath.com)
 
-### Landscaping
-- **Mulch** — Shredded hardwood, pine bark, cedar, cypress
-- **Soil / Topsoil** — Topsoil, garden mix, compost
-- **Decorative Stone** — Lava rock, river rock, crushed granite, pea gravel, limestone gravel
-- **Sod** — Standard and big rolls, pallet estimates
-- **Grass Seed** — New lawn and overseeding rates
-- **Fertilizer** — NPK-based application rates
+## 15 Calculators
 
-### Hardscaping
-- **Gravel** — Pea gravel, crushed stone, river rock (with compaction factor)
-- **Sand** — Play sand, masonry sand, concrete sand
-- **Pavers** — 5 common sizes with sand/gravel base calculations
-- **Limestone / Crushed Stone** — Driveway base material
-- **Retaining Wall** — Blocks, caps, gravel base, backfill, drainage
+| Category | Calculator | Slug |
+|----------|-----------|------|
+| 🌿 Landscaping | Mulch Calculator | `mulch` |
+| 🌿 Landscaping | Soil Calculator | `soil` |
+| 🌿 Landscaping | Gravel Calculator | `gravel` |
+| 🌿 Landscaping | Sand Calculator | `sand` |
+| 🌿 Landscaping | Topsoil Calculator | `topsoil` |
+| 🌿 Landscaping | Stone Calculator | `stone` |
+| 🌿 Landscaping | River Rock Calculator | `river-rock` |
+| 🌿 Landscaping | Pea Gravel Calculator | `pea-gravel` |
+| 🧱 Hardscaping | Paver Calculator | `pavers` |
+| 🧱 Hardscaping | Crushed Stone Calculator | `crushed-stone` |
+| 🧱 Hardscaping | Limestone Calculator | `limestone` |
+| 🧱 Hardscaping | Brick Calculator | `brick` |
+| 🏗️ Construction | Concrete Calculator | `concrete` |
+| 🏗️ Construction | Fill Dirt Calculator | `fill-dirt` |
+| 🏗️ Construction | Asphalt Calculator | `asphalt` |
 
-### Construction
-- **Concrete** — Slabs, footings, columns — bags and ready-mix
-- **Asphalt** — Overlay and new driveway calculations
-- **Decking** — Boards, joists, beams, posts, concrete footings, screws
-- **Fencing** — Posts, rails, pickets, concrete, gate hardware
+## Programmatic SEO Pages
+
+Pre-calculated dimension landing pages for the top 5 calculators. Example URLs:
+- `/calculators/mulch/4x8-garden-bed-3-inches`
+- `/calculators/concrete/12x12-patio-4-inches`
+- `/calculators/gravel/20x12-driveway-4-inches`
 
 ## Tech Stack
 
-- **Next.js 15** (App Router)
-- **TypeScript** (strict mode)
-- **Tailwind CSS** v4
-- **shadcn/ui** components
-- Pure React hooks — no external state library
+- **Next.js 16** (App Router) with Turbopack
+- **TypeScript** (strict)
+- **Tailwind CSS v4**
+- All interactive components use `"use client"` directive
+- Static generation via `generateStaticParams` for SEO pages
 
 ## Getting Started
 
@@ -44,46 +50,53 @@ npm install
 # Run development server
 npm run dev
 
-# Open http://localhost:3000
+# Build for production
+npm run build
+
+# Start production server
+npm start
 ```
 
 ## Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── layout.tsx          # Global layout (nav, footer)
-│   ├── page.tsx            # Homepage
-│   ├── sitemap.ts          # Auto-generated sitemap
-│   ├── calculators/        # 15 calculator pages
-│   └── blog/               # Blog placeholder
-├── components/             # Shared React components
-│   ├── ui/                 # shadcn/ui base components
-│   ├── CalculatorLayout.tsx
-│   ├── DimensionInput.tsx
-│   ├── ResultsPanel.tsx
-│   ├── CostBreakdown.tsx
-│   ├── MaterialSelector.tsx
-│   ├── HowToGuide.tsx
-│   ├── CalculatorCard.tsx
-│   ├── SEOContent.tsx
-│   └── GenericCalculator.tsx
+├── app/
+│   ├── layout.tsx                          # Global layout (nav, footer, SEO metadata)
+│   ├── page.tsx                            # Homepage (hero, calculator grid, how-it-works)
+│   ├── sitemap.ts                          # Auto-generated sitemap
+│   └── calculators/
+│       ├── layout.tsx                      # Calculator layout wrapper
+│       └── [slug]/
+│           ├── page.tsx                    # Dynamic calculator tool page
+│           └── [dimensions]/
+│               └── page.tsx                # Programmatic SEO landing page
+├── components/
+│   ├── GenericCalculator.tsx               # Universal calculator engine (all 15 types)
+│   ├── CalculatorCard.tsx                  # Homepage calculator cards
+│   ├── CalculatorLayout.tsx                # Calculator page layout wrapper
+│   ├── DimensionInput.tsx                  # Number input + unit selector
+│   ├── MaterialSelector.tsx                # Material subtype dropdown
+│   ├── ResultsPanel.tsx                    # Results display card
+│   ├── CostBreakdown.tsx                   # Cost estimate display
+│   ├── HowToGuide.tsx                      # Step-by-step guide
+│   ├── SEOContent.tsx                      # Long-form SEO content
+│   └── ui/                                # shadcn/ui components
 ├── lib/
-│   ├── calculator-engine.ts # Shared math engine
-│   ├── materials/           # 15 material-specific calculators
-│   ├── seo/                 # Programmatic SEO generators
-│   ├── units.ts             # Unit conversion utilities
-│   └── pricing.ts           # Cost estimation
+│   ├── calculator-engine.ts                # Shared math engine (bulk, concrete, paver, brick)
+│   ├── units.ts                            # Unit conversions
+│   ├── pricing.ts                          # Cost estimation
+│   ├── utils.ts                            # Tailwind class merging
+│   ├── seo/
+│   │   ├── metadata.ts                     # SEO metadata generation (JSON-LD, OG, etc.)
+│   │   └── programmatic-pages.ts           # SEO page generator
+│   └── materials/
+│       ├── mulch.ts, soil.ts, gravel.ts, ... # Per-material calculator implementations
+│       └── brick.ts                        # Brick calculator (custom formula)
 └── data/
-    ├── material-constants.ts # Material configs, densities, presets
-    └── regional-pricing.ts   # US regional price multipliers
+    ├── material-constants.ts               # All 15 calculator definitions + SEO content
+    └── regional-pricing.ts                 # Regional pricing multipliers
 ```
-
-## Architecture
-
-All calculators share a single math engine (`lib/calculator-engine.ts`). Each material file in `lib/materials/` is a thin wrapper that calls the engine with material-specific parameters (density, bag sizes, waste factors). This ensures zero duplicated math across 15 tools.
-
-Programmatic SEO pages are generated from dimension presets (`lib/seo/programmatic-pages.ts`) and included in the sitemap.
 
 ## License
 

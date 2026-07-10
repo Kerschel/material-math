@@ -15,8 +15,8 @@ interface DimensionInputProps {
   label: string;
   value: number;
   onChange: (value: number) => void;
-  unit: LengthUnit | DepthUnit;
-  onUnitChange: (unit: LengthUnit | DepthUnit) => void;
+  unit: string;
+  onUnitChange: (unit: string) => void;
   unitOptions: { value: string; label: string }[];
   placeholder?: string;
   min?: number;

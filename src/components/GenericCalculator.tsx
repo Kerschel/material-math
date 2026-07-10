@@ -24,15 +24,15 @@ import { calculateGravel, type GravelResults } from "@/lib/materials/gravel";
 import { calculateConcreteCost, type ConcreteCalcResults } from "@/lib/materials/concrete";
 import { calculatePaverProject, type PaverCalcResults } from "@/lib/materials/pavers";
 import { calculateSand, type SandResults } from "@/lib/materials/sand";
-import { calculateRock, type RockResults } from "@/lib/materials/rock";
-import { calculateSodCost, type SodCalcResults } from "@/lib/materials/sod";
-import { calculateGrassSeedCost, type GrassSeedCalcResults } from "@/lib/materials/grass-seed";
-import { calculateFertilizerCost, type FertilizerCalcResults } from "@/lib/materials/fertilizer";
 import { calculateLimestone, type LimestoneResults } from "@/lib/materials/limestone";
 import { calculateAsphaltCost, type AsphaltResults } from "@/lib/materials/asphalt";
-import { calculateDeckingCost, type DeckingCalcResults } from "@/lib/materials/decking";
-import { calculateFencingCost, type FencingCalcResults } from "@/lib/materials/fencing";
-import { calculateRetainingWallCost, type RetainingWallCalcResults } from "@/lib/materials/retaining-wall";
+import { calculateTopsoil, type TopsoilResults } from "@/lib/materials/topsoil";
+import { calculateFillDirt, type FillDirtResults } from "@/lib/materials/fill-dirt";
+import { calculateRiverRock, type RiverRockResults } from "@/lib/materials/river-rock";
+import { calculatePeaGravel, type PeaGravelResults } from "@/lib/materials/pea-gravel";
+import { calculateCrushedStone, type CrushedStoneResults } from "@/lib/materials/crushed-stone";
+import { calculateStone, type StoneResults } from "@/lib/materials/stone";
+import { calculateBricks, type BrickResults } from "@/lib/materials/brick";
 
 type CalculatorResult =
   | MulchResults
@@ -41,15 +41,15 @@ type CalculatorResult =
   | ConcreteCalcResults
   | PaverCalcResults
   | SandResults
-  | RockResults
-  | SodCalcResults
-  | GrassSeedCalcResults
-  | FertilizerCalcResults
   | LimestoneResults
   | AsphaltResults
-  | DeckingCalcResults
-  | FencingCalcResults
-  | RetainingWallCalcResults
+  | TopsoilResults
+  | FillDirtResults
+  | RiverRockResults
+  | PeaGravelResults
+  | CrushedStoneResults
+  | StoneResults
+  | BrickResults
   | null;
 
 interface GenericCalculatorProps {
@@ -67,19 +67,21 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
   // Input state
   const [length, setLength] = useState(10);
   const [width, setWidth] = useState(10);
-  const [depth, setDepth] = useState(config.defaultDepthIn);
+  const [depth, setDepth] = useState<number>(config.defaultDepthIn);
   const [lengthUnit, setLengthUnit] = useState<LengthUnit>("ft");
   const [widthUnit, setWidthUnit] = useState<LengthUnit>("ft");
   const [depthUnit, setDepthUnit] = useState<DepthUnit>("in");
 
   // Extra state for special calculators
-  const [fenceHeight, setFenceHeight] = useState(6);
-  const [fenceGates, setFenceGates] = useState(0);
+  const [concreteType, setConcreteType] = useState<"slab" | "footing" | "column">("slab");
   const [paverSize, setPaverSize] = useState("4\"×8\"");
   const [baseDepthIn, setBaseDepthIn] = useState(6);
-  const [grassType, setGrassType] = useState<"new" | "overseed">("new");
-  const [npk, setNpk] = useState("10-10-10");
-  const [concreteType, setConcreteType] = useState<"slab" | "footing" | "column">("slab");
+
+  // Brick-specific state
+  const [brickLengthIn, setBrickLengthIn] = useState(7.625);
+  const [brickWidthIn, setBrickWidthIn] = useState(3.625);
+  const [mortarGapIn, setMortarGapIn] = useState(0.375);
+  const [wastePercent, setWastePercent] = useState(5);
 
   const [result, setResult] = useState<CalculatorResult>(null);
 
@@ -105,9 +107,6 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
       case "sand":
         r = calculateSand({ length, width, depth, lengthUnit, widthUnit, depthUnit });
         break;
-      case "rock":
-        r = calculateRock({ length, width, depth, lengthUnit, widthUnit, depthUnit }, selectedSubtype);
-        break;
       case "limestone":
         r = calculateLimestone({ length, width, depth, lengthUnit, widthUnit, depthUnit });
         break;
@@ -117,56 +116,46 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
       case "pavers":
         r = calculatePaverProject({ length, width, lengthUnit, widthUnit, paverSize, baseDepthIn });
         break;
-      case "sod":
-        r = calculateSodCost(length, width, lengthUnit, widthUnit);
+      case "topsoil":
+        r = calculateTopsoil({ length, width, depth, lengthUnit, widthUnit, depthUnit }, selectedSubtype);
         break;
-      case "grass-seed":
-        r = calculateGrassSeedCost(length, width, lengthUnit, widthUnit, grassType === "new");
+      case "fill-dirt":
+        r = calculateFillDirt({ length, width, depth, lengthUnit, widthUnit, depthUnit }, selectedSubtype);
         break;
-      case "fertilizer":
-        r = calculateFertilizerCost({
-          length,
-          width,
-          lengthUnit,
-          widthUnit,
-          desiredNRate: 1,
-          npk,
-        });
+      case "river-rock":
+        r = calculateRiverRock({ length, width, depth, lengthUnit, widthUnit, depthUnit }, selectedSubtype);
         break;
-      case "decking":
-        r = calculateDeckingCost({ length, width, lengthUnit, widthUnit }, selectedSubtype);
+      case "pea-gravel":
+        r = calculatePeaGravel({ length, width, depth, lengthUnit, widthUnit, depthUnit }, selectedSubtype);
         break;
-      case "fencing":
-        r = calculateFencingCost(
-          { length, lengthUnit, heightFt: fenceHeight, gates: fenceGates },
-          selectedSubtype
-        );
+      case "crushed-stone":
+        r = calculateCrushedStone({ length, width, depth, lengthUnit, widthUnit, depthUnit }, selectedSubtype);
         break;
-      case "retaining-wall": {
-        const isLargeBlock = subtypeName.includes("18\"");
-        r = calculateRetainingWallCost(
+      case "stone":
+        r = calculateStone({ length, width, depth, lengthUnit, widthUnit, depthUnit }, selectedSubtype);
+        break;
+      case "brick":
+        r = calculateBricks(
           {
             length,
+            width,
             lengthUnit,
-            height: fenceHeight, // reuse fence height input
-            heightUnit: "ft",
-            blockLengthIn: isLargeBlock ? 18 : 12,
-            blockHeightIn: isLargeBlock ? 6 : 4,
-            baseDepthIn: 6,
-            baseWidthIn: 24,
-            capLengthIn: isLargeBlock ? 18 : 12,
+            widthUnit,
+            brickLengthIn,
+            brickWidthIn,
+            mortarGapIn,
+            wastePercent,
           },
           selectedSubtype
         );
         break;
-      }
     }
 
     setResult(r);
   }, [
     slug, length, width, depth, lengthUnit, widthUnit, depthUnit,
-    selectedSubtype, concreteType, paverSize, baseDepthIn, grassType,
-    npk, fenceHeight, fenceGates, subtypeName,
+    selectedSubtype, concreteType, paverSize, baseDepthIn,
+    brickLengthIn, brickWidthIn, mortarGapIn, wastePercent,
   ]);
 
   // Build result items
@@ -175,18 +164,18 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
 
     const items: { label: string; value: number | string; unit?: string; highlight?: boolean }[] = [];
 
-    // Common items in all results
+    // Common items
     if ("squareFeet" in result) {
       items.push({ label: "Area", value: result.squareFeet, unit: "sq ft" });
     }
     if ("cubicFeet" in result && result.cubicFeet > 0) {
-      items.push({ label: "Volume", value: result.cubicFeet, unit: "cu ft", highlight: true });
+      items.push({ label: "Volume", value: result.cubicFeet, unit: "cu ft" });
     }
     if ("cubicYards" in result && result.cubicYards > 0) {
       items.push({ label: "Volume", value: result.cubicYards, unit: "cu yd", highlight: true });
     }
     if ("tons" in result && result.tons > 0) {
-      items.push({ label: "Weight", value: result.tons, unit: "tons" });
+      items.push({ label: "Weight", value: result.tons, unit: "tons", highlight: true });
     }
     if ("bags" in result && result.bags > 0) {
       items.push({ label: "Bags", value: result.bags, unit: `bags` });
@@ -198,7 +187,7 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
     }
     if ("bags80lb" in result) {
       const r = result as ConcreteCalcResults;
-      items.push({ label: "80 lb Bags", value: r.bags80lb, unit: "bags" });
+      items.push({ label: "80 lb Bags", value: r.bags80lb, unit: "bags", highlight: true });
       items.push({ label: "60 lb Bags", value: r.bags60lb, unit: "bags" });
       items.push({ label: "40 lb Bags", value: r.bags40lb, unit: "bags" });
     }
@@ -208,61 +197,33 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
       items.push({ label: "Sand Base", value: r.sandBaseTons, unit: "tons" });
       items.push({ label: "Gravel Base", value: r.gravelBaseTons, unit: "tons" });
     }
-    if ("rolls" in result) {
-      const r = result as SodCalcResults;
-      items.push({ label: "Rolls", value: r.rolls, unit: "rolls", highlight: true });
-      items.push({ label: "Pallets", value: r.pallets, unit: "pallets" });
-    }
-    if ("newLawnLbs" in result) {
-      const r = result as GrassSeedCalcResults;
-      items.push({ label: "New Lawn Seed", value: r.newLawnLbs, unit: "lbs", highlight: true });
-      items.push({ label: "Overseed", value: r.overseedLbs, unit: "lbs" });
-    }
-    if ("lbsNeeded" in result && "bagsNeeded" in result) {
-      const r = result as FertilizerCalcResults;
-      items.push({ label: "Fertilizer", value: r.lbsNeeded, unit: "lbs", highlight: true });
-      items.push({ label: "50 lb Bags", value: r.bagsNeeded, unit: "bags" });
-    }
-    if ("deckBoards" in result) {
-      const r = result as DeckingCalcResults;
-      items.push({ label: "Deck Boards", value: r.deckBoards, unit: "boards", highlight: true });
-      items.push({ label: "Joists", value: r.joists, unit: "joists" });
-      items.push({ label: "Beams", value: r.beams, unit: "beams" });
-      items.push({ label: "Posts", value: r.posts, unit: "posts" });
-      items.push({ label: "Concrete Bags", value: r.concreteBags, unit: "80lb bags" });
-      items.push({ label: "Screws", value: r.screws, unit: "screws" });
-    }
-    if ("linearFeet" in result) {
-      const r = result as FencingCalcResults;
-      items.push({ label: "Fence Length", value: r.linearFeet, unit: "ft" });
-      items.push({ label: "Posts", value: r.posts, unit: "posts", highlight: true });
-      items.push({ label: "Rails", value: r.rails, unit: "rails" });
-      items.push({ label: "Pickets", value: r.pickets, unit: "pickets" });
-      items.push({ label: "Concrete", value: r.concreteBags, unit: "80lb bags" });
-    }
-    if ("totalBlocks" in result) {
-      const r = result as RetainingWallCalcResults;
-      items.push({ label: "Wall Blocks", value: r.totalBlocks, unit: "blocks", highlight: true });
-      items.push({ label: "Courses", value: r.courses, unit: "courses" });
-      items.push({ label: "Cap Blocks", value: r.capBlocks, unit: "caps" });
-      items.push({ label: "Base Gravel", value: r.baseGravelCuyd, unit: "cu yd" });
-      items.push({ label: "Backfill Gravel", value: r.backfillGravelCuyd, unit: "cu yd" });
-      items.push({ label: "Drain Pipe", value: r.drainagePipeFt, unit: "ft" });
-    }
     if ("asphaltTons" in result && !items.some((i) => i.label === "Weight")) {
       const r = result as AsphaltResults;
       items.push({ label: "Asphalt", value: r.asphaltTons, unit: "tons", highlight: true });
+    }
+    if ("dumpTruckLoads" in result) {
+      const r = result as FillDirtResults;
+      items.push({ label: "Dump Truck Loads", value: r.dumpTruckLoads, unit: "loads" });
+    }
+    if ("bricksNeeded" in result) {
+      const r = result as BrickResults;
+      items.push({ label: "Bricks Needed", value: r.bricksNeeded, unit: "bricks", highlight: true });
+      items.push({ label: "Bricks per Sq Ft", value: r.bricksPerSqft, unit: "bricks/sqft" });
+      items.push({ label: "Mortar", value: r.mortarCubicFeet, unit: "cu ft" });
     }
 
     return items;
   }, [result]);
 
-  // Build steps for HowToGuide
+  // Steps and tips
   const steps = getStepsForMaterial(slug, config.displayName);
   const tips = getTipsForMaterial(slug);
 
   // Preset cards
   const presetCards = getPresetCards(slug);
+
+  // Depth-exempt slugs
+  const hideDepth = ["brick"].includes(slug);
 
   return (
     <CalculatorLayout
@@ -282,7 +243,7 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
             unitOptions={LENGTH_UNITS}
           />
           <DimensionInput
-            label="Width"
+            label={slug === "brick" ? "Height" : "Width"}
             value={width}
             onChange={setWidth}
             unit={widthUnit}
@@ -290,8 +251,7 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
             unitOptions={LENGTH_UNITS}
           />
 
-          {/* Depth (not for all calculators) */}
-          {!["sod", "grass-seed", "decking", "fencing"].includes(slug) && (
+          {!hideDepth && (
             <DimensionInput
               label={slug === "pavers" ? "Base Depth" : "Depth"}
               value={depth}
@@ -304,7 +264,7 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
         </div>
 
         {/* Material subtype selector */}
-        {subtypes.length > 1 && !["concrete", "pavers", "fertilizer"].includes(slug) && (
+        {subtypes.length > 1 && !["concrete"].includes(slug) && (
           <MaterialSelector
             subtypes={subtypes}
             selected={subtypeName}
@@ -312,7 +272,7 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
           />
         )}
 
-        {/* Special inputs for specific calculators */}
+        {/* Concrete type selector */}
         {slug === "concrete" && (
           <div className="flex gap-4 items-end">
             <div className="space-y-1.5">
@@ -328,6 +288,7 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
           </div>
         )}
 
+        {/* Paver-specific */}
         {slug === "pavers" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -355,66 +316,40 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
           </div>
         )}
 
-        {slug === "grass-seed" && (
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Lawn Type</label>
-            <Tabs value={grassType} onValueChange={(v) => setGrassType(v as "new" | "overseed")}>
-              <TabsList>
-                <TabsTrigger value="new">New Lawn</TabsTrigger>
-                <TabsTrigger value="overseed">Overseeding</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        )}
-
-        {slug === "fertilizer" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">NPK Ratio</label>
-              <select
-                value={npk}
-                onChange={(e) => setNpk(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="10-10-10">10-10-10</option>
-                <option value="29-0-4">29-0-4</option>
-                <option value="16-4-8">16-4-8</option>
-                <option value="32-0-4">32-0-4</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {slug === "fencing" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Brick-specific inputs */}
+        {slug === "brick" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <DimensionInput
-              label="Fence Height"
-              value={fenceHeight}
-              onChange={setFenceHeight}
-              unit={lengthUnit}
-              onUnitChange={(u) => setLengthUnit(u as LengthUnit)}
-              unitOptions={LENGTH_UNITS}
-            />
-            <DimensionInput
-              label="Number of Gates"
-              value={fenceGates}
-              onChange={setFenceGates}
-              unit="ft"
+              label="Brick Length"
+              value={brickLengthIn}
+              onChange={setBrickLengthIn}
+              unit="in"
               onUnitChange={() => {}}
-              unitOptions={[{ value: "ft", label: "" }]}
+              unitOptions={[{ value: "in", label: "inches" }]}
             />
-          </div>
-        )}
-
-        {slug === "retaining-wall" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <DimensionInput
-              label="Wall Height"
-              value={fenceHeight}
-              onChange={setFenceHeight}
-              unit={lengthUnit}
-              onUnitChange={(u) => setLengthUnit(u as LengthUnit)}
-              unitOptions={LENGTH_UNITS}
+              label="Brick Width"
+              value={brickWidthIn}
+              onChange={setBrickWidthIn}
+              unit="in"
+              onUnitChange={() => {}}
+              unitOptions={[{ value: "in", label: "inches" }]}
+            />
+            <DimensionInput
+              label="Mortar Gap"
+              value={mortarGapIn}
+              onChange={setMortarGapIn}
+              unit="in"
+              onUnitChange={() => {}}
+              unitOptions={[{ value: "in", label: "inches" }]}
+            />
+            <DimensionInput
+              label="Waste %"
+              value={wastePercent}
+              onChange={setWastePercent}
+              unit="%"
+              onUnitChange={() => {}}
+              unitOptions={[{ value: "%", label: "%" }]}
             />
           </div>
         )}
@@ -482,7 +417,7 @@ export function GenericCalculator({ slug }: GenericCalculatorProps) {
   );
 }
 
-// ─── Helper functions for per-material guides ────────────────────
+// ─── Helper functions ────────────────────────────────────────────
 
 function getStepsForMaterial(slug: MaterialSlug, displayName: string): string[] {
   const base = [
@@ -490,30 +425,29 @@ function getStepsForMaterial(slug: MaterialSlug, displayName: string): string[] 
     `Determine the ${displayName.toLowerCase()} depth you need based on your project type.`,
     `Enter your dimensions into the calculator above and click "Calculate ${displayName}".`,
     `Review the results showing exactly how much ${displayName.toLowerCase()} you need in the right units.`,
-    `Add 5-10% extra for waste, settling, and unexpected variations — the calculator may already include this where appropriate.`,
+    `Add 5-10% extra for waste, settling, and unexpected variations.`,
   ];
 
-  // Customize step 2 per material
-  const step2Custom: Record<string, string> = {
+  const step2: Record<string, string> = {
     mulch: "Determine the mulch depth: 2-3 inches for standard garden beds, 3-4 inches for weed suppression.",
     soil: "Determine the soil depth: 4-6 inches for garden beds, 6-8 inches for vegetable gardens.",
     gravel: "Determine gravel depth: 2 inches for paths, 4 inches for driveways with proper compaction.",
     concrete: "Choose slab thickness: 4 inches for patios and walkways, 6 inches for driveways.",
     pavers: "Select your paver size and base depth: typically 4-6 inches of gravel base under 1 inch of sand.",
     sand: "Choose sand depth: 1-2 inches for paver bedding, 4-6 inches for play areas.",
-    rock: "For decorative rock, 2-3 inches depth is typical for ground cover and landscaping.",
-    sod: "Measure your lawn area accurately. Sod rolls typically cover 10 sq ft each.",
-    "grass-seed": "Decide between new lawn seeding (more seed) or overseeding an existing lawn (less seed).",
-    fertilizer: "Choose your NPK ratio. Typical home lawns need 1 lb of nitrogen per 1,000 sq ft.",
     limestone: "For driveways, 4-6 inches of compacted limestone base is standard.",
     asphalt: "Asphalt overlay is typically 2 inches; new driveways need 4 inches.",
-    decking: "Plan your deck dimensions and joist spacing (16 inches on center is standard).",
-    fencing: "Determine fence height and number of gates. Posts are typically spaced 8 feet apart.",
-    "retaining-wall": "Choose your block size. Standard blocks are 12\"×4\"; large blocks are 18\"×6\".",
+    topsoil: "For lawns, 2 inches for overseeding, 4-6 inches for new lawn installation.",
+    "fill-dirt": "Determine fill depth based on your leveling needs. Add 15-20% for compaction and settling.",
+    "river-rock": "For ground cover, 2-3 inches is standard. For dry creek beds, use larger stones at 3-4 inches.",
+    "pea-gravel": "For paths and patios, 2 inches depth is comfortable and effective.",
+    "crushed-stone": "For driveways, 4-6 inches compacted. For base layers, use 2-4 inches.",
+    stone: "For decorative stone, 2-3 inches depth is typical for ground cover and landscaping.",
+    brick: "Standard bricks are 7.625×3.625 inches with a ⅜-inch mortar gap. Measure your wall area carefully.",
   };
 
   return base.map((step, i) => {
-    if (i === 1 && step2Custom[slug]) return step2Custom[slug];
+    if (i === 1 && step2[slug]) return step2[slug];
     return step;
   });
 }
@@ -549,25 +483,6 @@ function getTipsForMaterial(slug: MaterialSlug): string[] {
       "Masonry sand is finer and better for paver bedding; concrete sand is coarser.",
       "Keep sand covered when not in use to prevent contamination from debris.",
     ],
-    rock: [
-      "Decorative rock can be heavy — ensure your vehicle can handle the weight before pickup.",
-      "Lava rock is much lighter than river rock, making it easier to spread.",
-    ],
-    sod: [
-      "Install sod the same day it's delivered for best results.",
-      "Water new sod daily for the first 2 weeks, then reduce to every other day.",
-      "Stagger the seams when laying sod rolls for a more natural look.",
-    ],
-    "grass-seed": [
-      "Water lightly 2-3 times per day when germinating new seed.",
-      "Fall is the best time to seed cool-season grasses; spring for warm-season.",
-      "Cover seed with a thin layer of straw to retain moisture and prevent birds from eating it.",
-    ],
-    fertilizer: [
-      "Always follow the application rate on the fertilizer bag.",
-      "Water your lawn after applying granular fertilizer.",
-      "Too much nitrogen can burn your lawn — more is not better.",
-    ],
     limestone: [
       "Limestone compacts well and creates an excellent base for pavers and asphalt.",
       "Use a plate compactor in 2-3 inch lifts for best compaction.",
@@ -577,20 +492,40 @@ function getTipsForMaterial(slug: MaterialSlug): string[] {
       "Hot mix asphalt must be placed and compacted while hot for proper results.",
       "Plan for asphalt to be paved in above-50°F weather.",
     ],
-    decking: [
-      "Pressure-treated lumber can warp — buy it shortly before you plan to build.",
-      "Use joist tape on top of joists to extend deck life.",
-      "Check local building codes for footing depth requirements.",
+    topsoil: [
+      "For new lawns, apply 4-6 inches of topsoil before seeding or laying sod.",
+      "For overseeding, 1-2 inches of top-dressing is sufficient.",
+      "Grade topsoil with a slight slope away from buildings for proper drainage.",
     ],
-    fencing: [
-      "Call 811 before digging post holes to avoid hitting underground utilities.",
-      "Set fence posts below the frost line in cold climates.",
-      "Wood posts should be pressure-treated or cedar for ground contact.",
+    "fill-dirt": [
+      "Clean fill is free of organic matter and debris — ideal for structural fill.",
+      "Fill dirt settles 10-20% over time — order extra accordingly.",
+      "Always call 811 before digging or filling to check for underground utilities.",
     ],
-    "retaining-wall": [
-      "Walls over 4 feet tall typically require engineering and permits.",
-      "Proper drainage behind the wall is critical to prevent failure.",
-      "Bury the first course at least partially underground for stability.",
+    "river-rock": [
+      "River rock works great for drainage because water flows freely between the smooth stones.",
+      "Use larger river rock (3-5 inches) for dry creek beds, smaller (1-2 inches) for ground cover.",
+      "Install edging to keep river rock from migrating into lawn areas.",
+    ],
+    "pea-gravel": [
+      "Pea gravel is comfortable underfoot — great for barefoot areas and playgrounds.",
+      "It doesn't lock together like angular stone, so use edging to contain it.",
+      "Rake pea gravel periodically to maintain an even surface.",
+    ],
+    "crushed-stone": [
+      "Angular crushed stone compacts better than rounded gravel for driveways.",
+      "Use crusher run (stone + fines) for maximum compaction on driveways.",
+      "Always grade your driveway with a slight crown for water runoff.",
+    ],
+    stone: [
+      "Larger stone sizes (2-4 inch) give better coverage per ton than smaller stones.",
+      "Use a weed barrier beneath decorative stone to minimize maintenance.",
+      "Edging helps keep decorative stone contained and looking neat.",
+    ],
+    brick: [
+      "Standard mortar gap is ⅜ inch — consistent gaps make a professional-looking wall.",
+      "Order 5-10% extra bricks for cuts, breakage, and future repairs.",
+      "For walls over 3 feet tall, consult a structural engineer.",
     ],
   };
 
